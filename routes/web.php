@@ -10,10 +10,14 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+//Ajax Routes
+Route::post('ebooks/ajax/selectedEbook', 'EbookController@selectedEbook');
+//Resource Routes
 Route::get('/', 'EbookController@index');
-Route::get('ebooks/ajax/selectedEbook', 'EbookController@selectedEbook');
-Route::get('ebooks/ajax/selectedPage', 'EbookController@selectedPage');
-Route::get('ebooks/{id}/edit', 'EbookController@edit')->name('ebooks.edit');
-Route::post('ebooks/{id}/update', 'EbookController@update')->name('ebooks.update');
+Route::get('ebooks/{id}/page/{number}/edit', 'EbookController@edit')->name('ebooks.edit');
 Route::get('ebooks/{id}', 'EbookController@show')->name('ebooks.show');
+Route::post('contents', 'ContentController@store')->name('contents.store');
+
+Route::get('clear', function(){
+    session()->flush();
+});

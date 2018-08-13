@@ -26,7 +26,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form action="{{ route('ebooks.update', $ebook->id) }}" method="POST">
+                    <form action="{{ route('contents.store') }}" method="POST">
                     @csrf
                     <div class="modal-body mx-3">
                         <div class="md-form mb-2">
@@ -43,13 +43,12 @@
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
-                        <input type="hidden" class="page-number" name="page-number" value="{{ $pageNumber }}">
-                        <input class="x-position" type="hidden" name="x-position" value="">
-                        <input class="y-position" type="hidden" name="y-position" value="">
+                        <input type="hidden" class="ebook" name="ebook" value="{{ $ebook->id }}">
+                        <input type="hidden" class="page-number" name="page_number" value="{{ $pageNumber }}">
+                        <input class="x-position" type="hidden" name="x_position" value="">
+                        <input class="y-position" type="hidden" name="y_position" value="">
                         <input class="box-width" type="hidden" name="width" value="250">
                         <input class="box-height" type="hidden" name="height" value="150">
-                        <input type="hidden" class="page-width" name="page-width" value ="">
-                        <input type="hidden" class="page-height" name="page-height" value ="">
                         <button id="btn-save" class="btn btn-success btn-block">Save</button>
                     </div>
                     </form>
@@ -62,7 +61,7 @@
 @section('js')
 <script src="{{ asset('jquery-ui/jquery-ui.min.js') }}"></script>
 <script>
-    var url = '{{ $ebook->path }}';
+    var url = '{{ asset("data/$ebook->path") }}';
     var thePdf = null;
     var scale = 1;
     PDFJS.getDocument(url).promise.then(function(pdf) {
@@ -86,8 +85,8 @@
             page.render({canvasContext: canvas.getContext('2d'), viewport: viewport});
         });
     }
+
     $(document).ready(function(){
-        
         var xPosition = 0;
         var yPosition = 0;
         var boxWidth = 250;

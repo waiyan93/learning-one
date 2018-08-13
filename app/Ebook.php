@@ -10,4 +10,8 @@ class Ebook extends Model
     protected $fillable = [
         'title', 'path'
     ];
+
+    public function contents() {
+        return $this->hasMany('App/Content');
+    }
 }

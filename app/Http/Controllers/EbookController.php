@@ -57,9 +57,9 @@ class EbookController extends Controller
      * @param  \App\Ebook  $ebook
      * @return \Illuminate\Http\Response
      */
-    public function edit($pageNumber)
+    public function edit($id, $pageNumber)
     {
-        $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        $ebook = Ebook::findOrFail($id);
         return view('e-books.edit', ['ebook' => $ebook, 'pageNumber' => $pageNumber]);
     }
 
@@ -72,7 +72,7 @@ class EbookController extends Controller
      */
     public function update(Request $request, $id)
     {
-        dd($request->all());
+        
     }
 
     /**

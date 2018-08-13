@@ -18,7 +18,7 @@
     $(document).ready(function() {
         $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
         var datas = [];
@@ -34,7 +34,7 @@
             (function () {
                 var thePdf = null;
                 var scale = 1;
-                var url = datas[i].path;
+                var url = 'data/'+datas[i].path;
                 var title = datas[i].title;
                 var ebook_id = datas[i].id;
                 PDFJS.getDocument(url).promise.then(function(pdf) {
@@ -71,7 +71,7 @@
                         var ebook_id = this.id;
                         $.ajax({
                             url: "{{ url('ebooks/ajax/selectedEbook') }}",
-                            method: 'get',
+                            method: 'post',
                             data: {
                                 'id': ebook_id
                             },

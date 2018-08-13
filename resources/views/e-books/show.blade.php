@@ -17,7 +17,7 @@
 @section('js')
 <script>  
     $(document).ready(function() {
-            var url = '{{ $ebook->path }}';
+            var url = '{{ asset("data/$ebook->path") }}';
             var thePdf = null;
             var scale = 1;
             PDFJS.getDocument(url).promise.then(function(pdf) {
@@ -54,7 +54,7 @@
 
                 $('.btn-edit').off('click').on('click', function(e) {
                     var page_number = this.id;
-                    window.location.href = '{{ url("ebooks") }}/' + page_number +'/edit';
+                    window.location.href = '{{ url("ebooks/$ebook->id/page") }}/' + page_number +'/edit';
                 });
             });
 
