@@ -17,7 +17,7 @@
 @section('js')
 <script>  
     $(document).ready(function() {
-            var url = '{{ asset("data/$ebook->path") }}';
+            var url = '{{ asset("data/$ebook->source") }}';
             var thePdf = null;
             var scale = 1;
             PDFJS.getDocument(url).promise.then(function(pdf) {

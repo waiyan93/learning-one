@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Ebook;
+use App\LinkType;
 use Illuminate\Http\Request;
 
 class EbookController extends Controller
@@ -25,7 +26,7 @@ class EbookController extends Controller
      */
     public function create()
     {
-        //
+        return view('e-books.create');
     }
 
     /**
@@ -36,7 +37,7 @@ class EbookController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request->all());
     }
 
     /**
@@ -60,35 +61,13 @@ class EbookController extends Controller
     public function edit($id, $pageNumber)
     {
         $ebook = Ebook::findOrFail($id);
-        return view('e-books.edit', ['ebook' => $ebook, 'pageNumber' => $pageNumber]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Ebook  $ebook
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Ebook  $ebook
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Ebook $ebook)
-    {
-        //
+        $linkTypes = LinkType::all();
+        return view('e-books.edit', ['ebook' => $ebook, 'pageNumber' => $pageNumber, 'linkTypes' => $linkTypes]);
     }
 
     public function selectedEbook(Request $request) 
     {
-        session(['ebookId' => $request->id]);
+        session()->put('ebookId', $request->id);
         return response()->json(['id' => $request->id]);
     }
 }

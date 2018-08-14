@@ -16,7 +16,7 @@ class CreateEbooksTable extends Migration
         Schema::create('ebooks', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title', 255);
-            $table->string('path', 255);
+            $table->string('source', 255);
             $table->softDeletes();
             $table->timestamps();
         });

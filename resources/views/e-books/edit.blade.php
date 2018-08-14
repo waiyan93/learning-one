@@ -4,11 +4,21 @@
     <link rel="stylesheet" href="{{ asset('jquery-ui/jquery-ui.min.css') }}">
 @endsection
 @section('btn')
-    <button id="select-content" class="btn btn-primary mr-5">Select Tool</button>
+    <button id="select-content" class="btn btn-primary">Select Tool</button>
+    <form action="{{ route('contents.store') }}" method="POST" class="ml-auto">
+    @csrf
+        <button id="export-pdf" class="btn btn-success">Export PDF</button>
+    </form>
 @endsection
 @section('content')
 <div class="row content-area">
     <div class="col-lg-12 col-md-12 mt-2">
+        @if(session()->has('success'))
+            <div class="alert alert-success" id="success-alert">
+                <button type="button" class="close" data-dismiss="alert">x</button>
+                {{ session()->get('success') }}
+            </div>
+        @endif
         <div class="select-box">
             <button id="add-link" type="button" class="float-right" data-toggle="modal" data-target="#addLinkModal">Add Link</button>
                 <h5 class="ui-widget-header pb-2">Drag Me</h5>
@@ -26,24 +36,24 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form action="{{ route('contents.store') }}" method="POST">
+                    <form action="{{ route('contents.add') }}" method="POST">
                     @csrf
                     <div class="modal-body mx-3">
                         <div class="md-form mb-2">
                             <label for="link-type">Link Type :</label>
                             <select name="link_type" id="link-type" class="form-control">
                                 <option value="0">Choose Link Type</option>
-                                <option value="1">Website Link</option>
-                                <option value="2">Video Link</option>
+                                @foreach ($linkTypes as $linkType)
+                                <option value="{{ $linkType->id }}">{{ $linkType->type }}</option>
+                                @endforeach
                             </select>
                         </div>
                             <div class="md-form mb-2">
                             <label for="link">Link :</label>
-                            <input type="text" name="link" id="link" class="form-control">
+                            <input type="text" name="link" id="link" class="form-control" required="required">
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
-                        <input type="hidden" class="ebook" name="ebook" value="{{ $ebook->id }}">
                         <input type="hidden" class="page-number" name="page_number" value="{{ $pageNumber }}">
                         <input class="x-position" type="hidden" name="x_position" value="">
                         <input class="y-position" type="hidden" name="y_position" value="">
@@ -61,7 +71,7 @@
 @section('js')
 <script src="{{ asset('jquery-ui/jquery-ui.min.js') }}"></script>
 <script>
-    var url = '{{ asset("data/$ebook->path") }}';
+    var url = '{{ asset("data/$ebook->source") }}';
     var thePdf = null;
     var scale = 1;
     PDFJS.getDocument(url).promise.then(function(pdf) {
@@ -134,6 +144,14 @@
 
         $('#cancel').click(function() {
             $(".select-box").hide();
+        });
+    
+        $("#success-alert").fadeTo(3000, 100).slideUp(500, function(){
+            $("#success-alert").slideUp(500);
+        });   
+
+        $('#export-pdf').click(function(){
+
         });
     });
 </script>

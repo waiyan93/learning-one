@@ -31,79 +31,104 @@ class ContentController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    * Store a newly created resource in storage.
+    *
+    * @param  \Illuminate\Http\content  $content
+    * @return \Illuminate\Http\Response
+    */
+    public function store()
     {
-        $ebook = Ebook::findOrFail($request->ebook);
-        /**
-        * Selected x and y position and convert to pt
-        */
-        $xPosition = intval(($request->x_position - 25 ) * 0.75);
-        $yPosition = intval(($request->y_position - 5 ) * 0.75);
-        
-        /**
-        * Reduce x-position if x > 300 and convert to pt
-        */
-        if($request->x_position > 300)
-        {
-            $xPosition = intval(($request->x_position - 24 ) * 0.75);
-        }
-
-        /**
-        * Reduce y-position if x > 600 and convert to pt
-        */
-        if($request->y_position > 600)
-        {
-            $yPosition = intval(($request->y_position - 6 ) * 0.75);
-        }
-
-        /**
-        * selected box width and height in pt
-        */
-        $boxWidth = intval($request->width * 0.75);
-        $boxHeight = intval($request->height * 0.75);
-
-        /**
-        * link and link-type to insert in selected area
-        */
-        $linkType = $request->link_type;
-        $link = $request->link;
-
+        $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        $pdf = new Fpdi\TcpdfFpdi(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        // get the page count
+        $pageCount = $pdf->setSourceFile('data/'.$ebook->source);
+        $contents = session()->get('contents');
         /**
         * FPDI conversion
         */
         // initiate FPDI
-        $pdf = new Fpdi\Fpdi('P', 'pt', 'Letter');
-        // get the page count
-
-        $pageCount = $pdf->setSourceFile('data/'.$ebook->path);
-
-        // iterate through all pages
+        // FPDF
+        // $pdf = new Fpdi\Fpdi('P', 'pt', 'Letter');
+        // TCPDF
         for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
-            // import a page
             $templateId = $pdf->importPage($pageNo);
-
             $pdf->AddPage();
-
-            // use the imported page and adjust the page size
             $pdf->useTemplate($templateId, [
                 'adjustPageSize' => true, 'width' => 600, 'height' => 750
             ]); 
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+            foreach($contents as $content)
+            {
+                /**
+                * Selected x and y position and convert to pt
+                */
+                $xPosition = intval(($content['xPosition'] - 25 ) * 0.75);
+                $yPosition = intval(($content['yPosition'] - 5 ) * 0.75);
+        
+                /**
+                * Reduce x-position if x > 300 and convert to pt
+                */
+                if($content['xPosition'] > 300)
+                {
+                    $xPosition = intval(($content['xPosition'] - 24 ) * 0.75);
+                }
 
-            // check page number to add link area
-            if ($pageNo == $request->page_number) {
-                $pdf->SetDrawColor(0, 255, 148);
-                $pdf->Rect($xPosition, $yPosition, $boxWidth, $boxHeight, 'D');
-                $pdf->Link($xPosition, $yPosition, $boxWidth, $boxHeight, $link);
+                /**
+                * Reduce y-position if x > 600 and convert to pt
+                */
+                if($content['yPosition'] > 600)
+                {
+                    $yPosition = intval(($content['yPosition'] - 6 ) * 0.75);
+                }
+
+                /**
+                * selected box width and height in pt
+                */
+                $boxWidth = intval($content['width'] * 0.75);
+                $boxHeight = intval($content['height'] * 0.75);
+
+                /**
+                * link and link-type to insert in selected area
+                */
+                $linkType = $content['linkType'];
+                $link = $content['link'];
+                if($pageNo == $content['pageNumber']) {
+                    if ($linkType == 1) {
+                        $pdf->SetAlpha(0.4);
+                        $pdf->SetFillColor(85,217,192);
+                        $pdf->SetDrawColor(2,35,28);
+                        $pdf->Rect($xPosition, $yPosition, $boxWidth, $boxHeight, 'DF');
+                        $pdf->Link( $xPosition, $yPosition, $boxWidth, $boxHeight, $link, $spaces = 0 );
+                    }elseif($linkType == 2) {
+                        $fbLink = 'https://www.facebook.com/sharer/sharer.php?u='.$link;
+                        $twitterLink = 'https://www.facebook.com/sharer/sharer.php?u='.$link;
+                        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+                        $pdf->SetDrawColor(0,0,0);
+                        $pdf->SetAlpha(0.5);
+                        $pdf->SetFillColor(85,217,192);
+                        $pdf->Rect($xPosition, $yPosition, $boxWidth, $boxHeight, 'DF');
+                        $pdf->SetAlpha(1);
+                        $iconXPosition = ($xPosition+$boxWidth) - 30;
+                        $pdf->Image('images/facebook.png', $iconXPosition-30, $yPosition,  30, 30, 'PNG', $fbLink);
+                        $pdf->Image('images/twitter.png',  $iconXPosition, $yPosition, 30, 30, 'PNG', $twitterLink);
+                    }elseif($linkType == 3) {
+                        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+                        $pdf->SetDrawColor(2,35,28);
+                        $pdf->Rect($xPosition, $yPosition, $boxWidth, $boxHeight, 'D');
+                        $pdf->SetAlpha(0.8);
+                        $imageXPosition = (($boxWidth/2) + $xPosition) - ($boxWidth/2)/2;
+                        $imageYPosition = (($boxHeight/2) + $yPosition) - ($boxHeight/2)/2;
+                        $pdf->Image('images/play.png',  $imageXPosition, $imageYPosition, $boxWidth/2, $boxHeight/2, 'PNG', $link);
+                    }
+                }
             }
-        }
-        $fileName = 'data/'.$ebook->path;
-        $pdf->Output($fileName, 'F');
+        }     
+        $pdf->Output($_SERVER['DOCUMENT_ROOT'].'/data/'.$ebook->source, 'F');
         session()->forget('ebookId');
+        session()->forget('contents');
+        // $pdf->Output();
+        return redirect('/')->with('success', 'A PDF is modified!');
     }
 
     /**
@@ -112,7 +137,7 @@ class ContentController extends Controller
      * @param  \App\Content  $content
      * @return \Illuminate\Http\Response
      */
-    public function show(Content $content)
+    public function show()
     {
         //
     }
@@ -131,11 +156,11 @@ class ContentController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\content  $content
      * @param  \App\Content  $content
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Content $content)
+    public function update()
     {
         //
     }
@@ -146,8 +171,28 @@ class ContentController extends Controller
      * @param  \App\Content  $content
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Content $content)
+    public function destroy()
     {
         //
+    }
+
+    public function addContent(Request $request) {
+        $content = [
+            'linkType' => $request->link_type,
+            'link' => $request->link,
+            'pageNumber' => $request->page_number,
+            'xPosition' => $request->x_position,
+            'yPosition' => $request->y_position,
+            'width' => $request->width,
+            'height' => $request->height
+        ];
+        if(session()->has('contents'))
+        {   
+            session()->push('contents', $content);
+        } else {
+            session()->put('contents', []);
+            session()->push('contents', $content);
+        }
+        return redirect()->back()->with('success', 'A content is added into the page!');
     }
 }

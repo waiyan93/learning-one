@@ -1,5 +1,8 @@
 @extends('layouts.master')
 @section('title', '| PDF List')
+@section('btn')
+    <a href="{{ route('ebooks.create') }}" id="" class="btn btn-primary ml-auto">Add Ebook</a>
+@endsection
 @section('content')
     <div class="row content-area">
         <div class="col-lg-12 col-md-12 bg-secondary">
@@ -26,7 +29,7 @@
             var data = {
                 'id': '{{ $ebook->id }}',
                 'title': '{{ $ebook->title }}',
-                'path' : '{{ $ebook->path }}',
+                'source' : '{{ $ebook->source }}',
             }
             datas.push(data);
         @endforeach
@@ -34,7 +37,7 @@
             (function () {
                 var thePdf = null;
                 var scale = 1;
-                var url = 'data/'+datas[i].path;
+                var url = 'data/'+datas[i].source;
                 var title = datas[i].title;
                 var ebook_id = datas[i].id;
                 PDFJS.getDocument(url).promise.then(function(pdf) {

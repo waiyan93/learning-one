@@ -17,21 +17,21 @@ class EbooksTableSeeder extends Seeder
             [
                 'id' => 1,
                 'title' => 'First PDF',
-                'path' => '1.pdf',
+                'source' => '1.pdf',
                 'created_at' =>  Carbon::now()->format('Y-m-d H:i:s'),
                 'updated_at' =>  Carbon::now()->format('Y-m-d H:i:s')
             ],
             [
                 'id' => 2,
                 'title' => 'Second PDF',
-                'path' => '2.pdf',
+                'source' => '2.pdf',
                 'created_at' =>  Carbon::now()->format('Y-m-d H:i:s'),
                 'updated_at' =>  Carbon::now()->format('Y-m-d H:i:s')
             ],
             [
                 'id' => 3,
                 'title' => 'Third PDF',
-                'path' => '3.pdf',
+                'source' => '3.pdf',
                 'created_at' =>  Carbon::now()->format('Y-m-d H:i:s'),
                 'updated_at' =>  Carbon::now()->format('Y-m-d H:i:s')
             ],
