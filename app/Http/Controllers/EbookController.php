@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Ebook;
 use App\LinkType;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreEbookRequest;
 
 class EbookController extends Controller
 {
@@ -35,9 +38,25 @@ class EbookController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreEbookRequest $request)
     {
-        dd($request->all());
+        if($request->hasFile('pdf'))
+        {
+            $pdf = $request->pdf;
+            $fileName = $pdf->getClientOriginalName();
+            $title = pathinfo($fileName, PATHINFO_FILENAME);
+            $originalPath = Storage::disk('public')->putFile('original-ebooks', $request->file('pdf'));
+            $exp = explode('/', $originalPath);
+            $editedPath = 'edited-ebooks/'.$exp[1];
+            Storage::disk('public')->copy($originalPath, $editedPath);
+
+            Ebook::create([
+                'title' => $title,
+                'original' => $originalPath,
+                'edited' => $editedPath
+            ]);
+            return redirect('/')->with('success', 'A PDF is added successfully!');
+        }
     }
 
     /**

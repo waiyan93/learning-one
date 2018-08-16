@@ -1,12 +1,29 @@
 @extends('layouts.master')
 @section('title', '| Show PDF')
+@section('btn')
+
+@endsection
 @section('content')
     <div class="row content-area">
         <div class="col-lg-12 col-md-12 bg-secondary">
-           <div class="row mt-4">
+           <div class="row">
                 <div class="col-lg-12 col-md-12">
-                    <h5 class="text-white">{{ $ebook->title }}</h5>
-                    <hr>
+                    <div class="row my-2">
+                        <div class="col-lg-4 col-md-4">
+                            <h5 class="text-white navbar-brand mr-0 mb-0">{{ $ebook->title }}</h5>
+                        </div>
+                        <div class="col-lg-4 col-md-4 text-center">
+                            @if(session()->has('contents'))
+                            <h6 class="text-white navbar-brand mr-0 mb-0">Total Content(s): {{ count(session()->get('contents')) }}</h6>
+                            @else
+                            <h6 class="text-white navbar-brand mr-0 mb-0">Total Content(s): 0</h6>
+                            @endif
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <a href="{{ route('contents') }}" class="btn btn-primary float-right">View All Added Contents</a>
+                        </div>
+                    </div>
+                    <hr class="mt-0 mb-2">
                     <div class="row" id="thumbnail-viewer">
                     </div>
                 </div>
@@ -17,7 +34,7 @@
 @section('js')
 <script>  
     $(document).ready(function() {
-            var url = '{{ asset("data/$ebook->source") }}';
+            var url = '{{ url("storage", $ebook->original) }}';
             var thePdf = null;
             var scale = 1;
             PDFJS.getDocument(url).promise.then(function(pdf) {

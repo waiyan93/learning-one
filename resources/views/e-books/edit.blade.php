@@ -4,6 +4,12 @@
     <link rel="stylesheet" href="{{ asset('jquery-ui/jquery-ui.min.css') }}">
 @endsection
 @section('btn')
+    <a class="btn btn-success text-white">Back</a>
+    @if(session()->has('contents'))
+    <h6 class="text-white navbar-brand mx-4 mb-0">Total Content(s): {{ count(session()->get('contents')) }}</h6>
+    @else
+    <h6 class="text-white navbar-brand mx-4 mb-0">Total Content(s): 0</h6>
+    @endif
     <button id="select-content" class="btn btn-primary">Select Tool</button>
     <form action="{{ route('contents.store') }}" method="POST" class="ml-auto">
     @csrf
@@ -50,7 +56,7 @@
                         </div>
                             <div class="md-form mb-2">
                             <label for="link">Link :</label>
-                            <input type="text" name="link" id="link" class="form-control" required="required">
+                            <input type="text" name="link" id="link" class="form-control" required="required" placeholder="eg: www.example.com">
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
@@ -71,7 +77,7 @@
 @section('js')
 <script src="{{ asset('jquery-ui/jquery-ui.min.js') }}"></script>
 <script>
-    var url = '{{ asset("data/$ebook->source") }}';
+    var url = '{{ url("storage", $ebook->edited) }}';
     var thePdf = null;
     var scale = 1;
     PDFJS.getDocument(url).promise.then(function(pdf) {
@@ -145,14 +151,7 @@
         $('#cancel').click(function() {
             $(".select-box").hide();
         });
-    
-        $("#success-alert").fadeTo(3000, 100).slideUp(500, function(){
-            $("#success-alert").slideUp(500);
-        });   
-
-        $('#export-pdf').click(function(){
-
-        });
+  
     });
 </script>
 @endsection

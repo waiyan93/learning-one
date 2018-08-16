@@ -19,7 +19,9 @@ Route::post('ebooks', 'EbookController@store')->name('ebooks.store');
 Route::get('ebooks/{id}/page/{number}/edit', 'EbookController@edit')->name('ebooks.edit');
 Route::get('ebooks/{id}', 'EbookController@show')->name('ebooks.show');
 Route::post('contents', 'ContentController@store')->name('contents.store');
+Route::get('contents', 'ContentController@index')->name('contents');
 Route::post('contents/add-content', 'ContentController@addContent')->name('contents.add');
+Route::delete('contents/clear-all-contents', 'ContentController@clearAll')->name('contents.clear.all');
 
 Route::get('clear', function(){
     session()->flush();

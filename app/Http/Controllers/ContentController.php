@@ -17,7 +17,9 @@ class ContentController extends Controller
      */
     public function index()
     {
-        //
+        $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        $contents = session()->get('contents');
+        return view('contents.index', ['ebook' => $ebook, 'contents' => $contents]);
     }
 
     /**
@@ -41,7 +43,7 @@ class ContentController extends Controller
         $ebook = Ebook::findOrFail(session()->get('ebookId'));
         $pdf = new Fpdi\TcpdfFpdi(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         // get the page count
-        $pageCount = $pdf->setSourceFile('data/'.$ebook->source);
+        $pageCount = $pdf->setSourceFile('storage/'.$ebook->original);
         $contents = session()->get('contents');
         /**
         * FPDI conversion
@@ -124,10 +126,13 @@ class ContentController extends Controller
                 }
             }
         }     
-        $pdf->Output($_SERVER['DOCUMENT_ROOT'].'/data/'.$ebook->source, 'F');
+        $exp = explode('/', $ebook->original);
+        $updatedPath = 'updated-ebooks/'.$exp[1];
+        $pdf->Output($_SERVER['DOCUMENT_ROOT'].'/storage/'.$updatedPath, 'F');
+        $ebook->updated = $updatedPath;
+        $ebook->save();
         session()->forget('ebookId');
         session()->forget('contents');
-        // $pdf->Output();
         return redirect('/')->with('success', 'A PDF is modified!');
     }
 
@@ -194,5 +199,12 @@ class ContentController extends Controller
             session()->push('contents', $content);
         }
         return redirect()->back()->with('success', 'A content is added into the page!');
+    }
+    
+    public function clearAll()
+    {
+        // $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        session()->flush();
+        return redirect('/')->with('success', 'All added contents are successfully clear!');
     }
 }

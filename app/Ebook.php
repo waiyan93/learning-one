@@ -8,7 +8,7 @@ class Ebook extends Model
 {
     protected $table = 'ebooks';
     protected $fillable = [
-        'title', 'path'
+        'title', 'original', 'edited', 'updated'
     ];
 
     public function contents() {

@@ -14,9 +14,7 @@
     <section id="main-nav">
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
             <a class="navbar-brand" href="{{ url('/') }}">PDF Editor</a>
-            @if(session()->has('contents'))
-            <a class="text-white navbar-brand">Total Content(s): {{ count(session()->get('contents')) }}</a>
-            @endif
+           
             @yield('btn')
             <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -40,6 +38,11 @@
     </section>
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('pdf-js/build/pdf.js') }}"></script>
+    <script>
+        $("#success-alert").fadeTo(3000, 100).slideUp(500, function(){
+            $("#success-alert").slideUp(500);
+        }); 
+    </script>
     @yield('js')
 </body>
 </html>

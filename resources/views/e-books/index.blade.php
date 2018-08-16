@@ -6,6 +6,12 @@
 @section('content')
     <div class="row content-area">
         <div class="col-lg-12 col-md-12 bg-secondary">
+            @if(session()->has('success'))
+                <div class="alert alert-success mt-2" id="success-alert">
+                    <button type="button" class="close" data-dismiss="alert">x</button>
+                    {{ session()->get('success') }}
+                </div>
+            @endif
            <div class="row mt-4">
                 <div class="col-lg-12 col-md-12">
                     <div class="row" id="thumbnail-viewer">
@@ -24,12 +30,13 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+        @if(count($ebooks) > 0 )
         var datas = [];
         @foreach($ebooks as $ebook)
             var data = {
                 'id': '{{ $ebook->id }}',
                 'title': '{{ $ebook->title }}',
-                'source' : '{{ $ebook->source }}',
+                'original' : '{{ $ebook->original }}',
             }
             datas.push(data);
         @endforeach
@@ -37,7 +44,7 @@
             (function () {
                 var thePdf = null;
                 var scale = 1;
-                var url = 'data/'+datas[i].source;
+                var url = '{{ url("storage") }}/'+datas[i].original;
                 var title = datas[i].title;
                 var ebook_id = datas[i].id;
                 PDFJS.getDocument(url).promise.then(function(pdf) {
@@ -99,6 +106,15 @@
                 }   
             }) ();
         }
+        @else
+            var viewer = document.getElementById('thumbnail-viewer');
+            var jumbotron = document.createElement('div');
+            jumbotron.className = 'jumbotron col-lg-8 col-md-8 offset-lg-2 offset-md-2';
+            var msg = document.createElement('h1');
+            msg.innerText = 'Whoops! There is no ebook to show.';
+            viewer.appendChild(jumbotron);
+            jumbotron.appendChild(msg);
+        @endif
     });
 </script>
 @endsection
