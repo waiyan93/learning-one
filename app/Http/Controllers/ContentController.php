@@ -7,6 +7,7 @@ use App\Ebook;
 use App\Content;
 use \setasign\Fpdi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ContentController extends Controller
 {
@@ -198,13 +199,145 @@ class ContentController extends Controller
             session()->put('contents', []);
             session()->push('contents', $content);
         }
+        $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        $pdf = new Fpdi\TcpdfFpdi(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        // get the page count
+        $pageCount = $pdf->setSourceFile('storage/'.$ebook->original);
+        $contents = session()->get('contents');
+        /**
+        * FPDI conversion
+        */
+        // initiate FPDI
+        // FPDF
+        // $pdf = new Fpdi\Fpdi('P', 'pt', 'Letter');
+        // TCPDF
+        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+            $templateId = $pdf->importPage($pageNo);
+            $pdf->AddPage();
+            $pdf->useTemplate($templateId, [
+                'adjustPageSize' => true, 'width' => 600, 'height' => 750
+            ]); 
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+            foreach($contents as $content)
+            {
+                /**
+                * Selected x and y position and convert to pt
+                */
+                $xPosition = intval(($content['xPosition'] - 25 ) * 0.75);
+                $yPosition = intval(($content['yPosition'] - 5 ) * 0.75);
+        
+                /**
+                * Reduce x-position if x > 300 and convert to pt
+                */
+                if($content['xPosition'] > 300)
+                {
+                    $xPosition = intval(($content['xPosition'] - 24 ) * 0.75);
+                }
+
+                /**
+                * Reduce y-position if x > 600 and convert to pt
+                */
+                if($content['yPosition'] > 600)
+                {
+                    $yPosition = intval(($content['yPosition'] - 6 ) * 0.75);
+                }
+
+                /**
+                * selected box width and height in pt
+                */
+                $boxWidth = intval($content['width'] * 0.75);
+                $boxHeight = intval($content['height'] * 0.75);
+
+                /**
+                * link and link-type to insert in selected area
+                */
+                $linkType = $content['linkType'];
+                $link = $content['link'];
+                if($pageNo == $content['pageNumber']) {
+                    if ($linkType == 1) {
+                        $pdf->SetAlpha(0.4);
+                        $pdf->SetFillColor(85,217,192);
+                        $pdf->SetDrawColor(2,35,28);
+                        $pdf->Rect($xPosition, $yPosition, $boxWidth, $boxHeight, 'DF');
+                    }elseif($linkType == 2) {
+                        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+                        $pdf->SetDrawColor(0,0,0);
+                        $pdf->SetAlpha(0.5);
+                        $pdf->SetFillColor(85,217,192);
+                        $pdf->Rect($xPosition, $yPosition, $boxWidth, $boxHeight, 'DF');
+                        $pdf->SetAlpha(1);
+                        $iconXPosition = ($xPosition+$boxWidth) - 30;
+                        $pdf->Image('images/facebook.png', $iconXPosition-30, $yPosition,  30, 30, 'PNG');
+                        $pdf->Image('images/twitter.png',  $iconXPosition, $yPosition, 30, 30, 'PNG');
+                    }elseif($linkType == 3) {
+                        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+                        $pdf->SetAlpha(0.5);
+                        $pdf->SetDrawColor(2,35,28);
+                        $pdf->SetFillColor(85,217,192);
+                        $pdf->Rect($xPosition, $yPosition, $boxWidth, $boxHeight, 'DF');
+                        $pdf->SetAlpha(0.8);
+                        $imageXPosition = (($boxWidth/2) + $xPosition) - ($boxWidth/2)/2;
+                        $imageYPosition = (($boxHeight/2) + $yPosition) - ($boxHeight/2)/2;
+                        $pdf->Image('images/play.png',  $imageXPosition, $imageYPosition, $boxWidth/2, $boxHeight/2, 'PNG');
+                    }
+                }
+            }
+        }     
+        $exp = explode('/', $ebook->original);
+        $editedPath = 'edited-ebooks/'.$exp[1];
+        $pdf->Output($_SERVER['DOCUMENT_ROOT'].'/storage/'.$editedPath, 'F');
         return redirect()->back()->with('success', 'A content is added into the page!');
     }
     
     public function clearAll()
     {
         // $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        Storage::disk('public')->delete($ebook->edited);
+        $exp = explode('/', $ebook->original);
+        $editedPath = 'edited-ebooks/'.$exp[1];
+        Storage::disk('public')->copy($ebook->original, $editedPath);
         session()->flush();
         return redirect('/')->with('success', 'All added contents are successfully clear!');
+    }
+
+    public function clearPage($pageNumber)
+    {
+        $contents = session()->get('contents');
+        foreach($contents as $key => $value)
+        {
+            if($value['pageNumber'] == $pageNumber)
+            {
+                session()->pull('contents.'.$key);
+            }
+        }
+        $ebook = Ebook::findOrFail(session()->get('ebookId'));
+        $pdf = new Fpdi\TcpdfFpdi(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        // get the page count
+        $pageCount = $pdf->setSourceFile('storage/'.$ebook->edited);
+        for ($pageNo = 1; $pageNo <= $pageCount; $pageNo++) {
+            $templateId = $pdf->importPage($pageNo);
+            $pdf->AddPage();
+            $pdf->useTemplate($templateId, [
+                'adjustPageSize' => true, 'width' => 600, 'height' => 750
+            ]); 
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+            if($pageNo == $pageNumber) {
+                $pdf->deletePage($pageNumber);
+                $pdf->AddPage();
+                // get the page count
+                $pdf->setSourceFile('storage/'.$ebook->original);
+                $templateId = $pdf->importPage($pageNo);
+                $pdf->useTemplate($templateId, [
+                    'adjustPageSize' => true, 'width' => 600, 'height' => 750
+                ]); 
+            }
+        }  
+        $exp = explode('/', $ebook->original);
+        $editedPath = 'edited-ebooks/'.$exp[1];
+        $pdf->Output($_SERVER['DOCUMENT_ROOT'].'/storage/'.$editedPath, 'F');
+        return redirect()->route('contents')->with('success', 'A page\'s contents are successfully clear!');
     }
 }

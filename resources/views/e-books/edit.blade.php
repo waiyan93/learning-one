@@ -4,17 +4,27 @@
     <link rel="stylesheet" href="{{ asset('jquery-ui/jquery-ui.min.css') }}">
 @endsection
 @section('btn')
-    <a class="btn btn-success text-white">Back</a>
     @if(session()->has('contents'))
     <h6 class="text-white navbar-brand mx-4 mb-0">Total Content(s): {{ count(session()->get('contents')) }}</h6>
     @else
     <h6 class="text-white navbar-brand mx-4 mb-0">Total Content(s): 0</h6>
     @endif
-    <button id="select-content" class="btn btn-primary">Select Tool</button>
-    <form action="{{ route('contents.store') }}" method="POST" class="ml-auto">
-    @csrf
-        <button id="export-pdf" class="btn btn-success">Export PDF</button>
-    </form>
+    <div class="navbar-nav ml-auto">
+        <a class="btn btn-success text-white mx-2" href="{{ route('ebooks.show', $ebook->id) }}">Back</a>
+        <button id="select-content" class="btn btn-primary mx-2">Select Tool</button>
+        @if(session()->has('contents'))
+        <a href="{{ route('contents') }}" class="btn btn-primary mx-2">View All Added Contents</a>
+        <form action="{{ route('contents.clear', $pageNumber) }}" method="POST">
+            <input type="hidden" name="_method" value="delete" />
+            @csrf
+            <input type="submit" name="clear_page" class="btn btn-danger mx-2" value="Clear Page">
+        </form>
+        <form action="{{ route('contents.store') }}" method="POST">
+        @csrf
+            <button id="export-pdf" class="btn btn-warning mx-2">Export PDF</button>
+        </form>
+        @endif
+    </div>
 @endsection
 @section('content')
 <div class="row content-area">

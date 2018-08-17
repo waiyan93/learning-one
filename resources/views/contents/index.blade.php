@@ -8,6 +8,12 @@
         <div class="col-lg-12 col-md-12 bg-secondary">
            <div class="row">
                 <div class="col-lg-12 col-md-12">
+                        @if(session()->has('success'))
+                        <div class="alert alert-success mt-2" id="success-alert">
+                            <button type="button" class="close" data-dismiss="alert">x</button>
+                            {{ session()->get('success') }}
+                        </div>
+                        @endif
                     <div class="row my-2">
                         <div class="col-lg-4 col-md-4">
                             <a href="{{ route('ebooks.show', $ebook->id) }}" class="text-warning navbar-brand">{{ $ebook->title }}<a>
@@ -21,7 +27,7 @@
                             <form action="{{ route('contents.clear.all') }}" method="POST">
                                 <input type="hidden" name="_method" value="delete" />
                                 @csrf
-                                <input type="submit" name="clear_all" class="btn btn-primary float-right" value="Clear All Contents">
+                                <input type="submit" name="clear_all" id="clear-all" class="btn btn-primary float-right" value="Clear All Contents">
                             </form>
                         </div>
                     </div>
@@ -42,11 +48,16 @@
             }
         });
         var pageNumbers = [];
+        @if(count($contents) > 0)
         @foreach($contents as $content)
             var pageNumber = '{{ $content["pageNumber"] }}';
-            pageNumbers.push(pageNumber);
+            if(pageNumbers.includes(pageNumber)) {
+                pageNumbers = pageNumbers;
+            }else{
+                pageNumbers.push(pageNumber);
+            }
         @endforeach
-        var url = '{{ asset("data/$ebook->source") }}';
+        var url = '{{ asset("storage/$ebook->edited") }}';
         var thePdf = null;
         var scale = 1;
         PDFJS.getDocument(url).promise.then(function(pdf) {
@@ -81,6 +92,10 @@
                 card_body.appendChild(action);
                 renderPage(page, canvas);
             }
+            $('.btn-edit').off('click').on('click', function(e) {
+                var page_number = this.id;
+                window.location.href = '{{ url("ebooks/$ebook->id/page") }}/' + page_number +'/edit';
+            });
         });
 
         function renderPage(pageNumber, canvas) {
@@ -96,6 +111,16 @@
                 });
             });
         }
+        @else
+            var viewer = document.getElementById('thumbnail-viewer');
+            var jumbotron = document.createElement('div');
+            jumbotron.className = 'jumbotron col-lg-8 col-md-8 offset-lg-2 offset-md-2 text-center';
+            var msg = document.createElement('h1');
+            msg.innerText = 'Whoops! There is no contents.';
+            viewer.appendChild(jumbotron);
+            jumbotron.appendChild(msg);
+            $('#clear-all').hide();
+        @endif
     });
 </script>
 @endsection

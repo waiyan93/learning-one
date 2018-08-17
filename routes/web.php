@@ -22,6 +22,7 @@ Route::post('contents', 'ContentController@store')->name('contents.store');
 Route::get('contents', 'ContentController@index')->name('contents');
 Route::post('contents/add-content', 'ContentController@addContent')->name('contents.add');
 Route::delete('contents/clear-all-contents', 'ContentController@clearAll')->name('contents.clear.all');
+Route::delete('contents/{number}/clear-page', 'ContentController@clearPage')->name('contents.clear');
 
 Route::get('clear', function(){
     session()->flush();
