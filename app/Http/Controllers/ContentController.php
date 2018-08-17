@@ -132,9 +132,8 @@ class ContentController extends Controller
         $pdf->Output($_SERVER['DOCUMENT_ROOT'].'/storage/'.$updatedPath, 'F');
         $ebook->updated = $updatedPath;
         $ebook->save();
-        session()->forget('ebookId');
-        session()->forget('contents');
-        return redirect('/')->with('success', 'A PDF is modified!');
+        session()->flush();
+        return redirect()->route('ebooks.download.show', $ebook->id)->with('success', 'Contents are added to the PDF!');
     }
 
     /**

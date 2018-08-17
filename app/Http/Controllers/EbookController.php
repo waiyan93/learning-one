@@ -89,4 +89,21 @@ class EbookController extends Controller
         session()->put('ebookId', $request->id);
         return response()->json(['id' => $request->id]);
     }
+
+    public function showDownload($id)
+    {
+        $ebook = Ebook::findOrFail($id);
+        return view('e-books.download', ['ebook' => $ebook]);
+    }
+
+    public function download($id)
+    {
+        $ebook = Ebook::findOrFail($id);
+        $name = $ebook->title;
+        $file = $_SERVER['DOCUMENT_ROOT'].'/storage/'.$ebook->updated;
+        $headers = [
+            'Content-Type: application/pdf',
+        ];  
+        return response()->download($file, $name, $headers);
+    }
 }

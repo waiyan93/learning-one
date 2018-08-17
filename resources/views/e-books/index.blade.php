@@ -6,12 +6,6 @@
 @section('content')
     <div class="row content-area">
         <div class="col-lg-12 col-md-12 bg-secondary">
-            @if(session()->has('success'))
-                <div class="alert alert-success mt-2" id="success-alert">
-                    <button type="button" class="close" data-dismiss="alert">x</button>
-                    {{ session()->get('success') }}
-                </div>
-            @endif
            <div class="row mt-4">
                 <div class="col-lg-12 col-md-12">
                     <div class="row" id="thumbnail-viewer">

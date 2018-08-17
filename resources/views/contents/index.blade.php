@@ -1,7 +1,7 @@
 @extends('layouts.master')
 @section('title', '| All Contents')
 @section('btn')
-    
+ 
 @endsection
 @section('content')
     <div class="row content-area">
@@ -24,11 +24,22 @@
                             @endif
                         </div>
                         <div class="col-lg-4 col-md-4">
-                            <form action="{{ route('contents.clear.all') }}" method="POST">
-                                <input type="hidden" name="_method" value="delete" />
-                                @csrf
-                                <input type="submit" name="clear_all" id="clear-all" class="btn btn-primary float-right" value="Clear All Contents">
-                            </form>
+                            <div class="row">
+                                <div class="col-lg-9 col-md-9">
+                                <form action="{{ route('contents.clear.all') }}" method="POST">
+                                    <input type="hidden" name="_method" value="delete" />
+                                    @csrf
+                                    <input type="submit" name="clear_all" id="clear-all" class="btn btn-danger mr-2 float-right" value="Clear All Contents">
+                                </form>
+                                </div>
+                                <div class="col-lg-3 col-md-3">
+                                <form action="{{ route('contents.store') }}" method="POST">
+                                    @csrf
+                                    <button id="export-pdf" class="btn btn-warning mx-2 float-right">Export PDF</button>
+                                </form>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                     <hr class="mt-0 mb-2">

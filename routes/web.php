@@ -17,6 +17,8 @@ Route::get('/', 'EbookController@index');
 Route::get('ebooks/create', 'EbookController@create')->name('ebooks.create');
 Route::post('ebooks', 'EbookController@store')->name('ebooks.store');
 Route::get('ebooks/{id}/page/{number}/edit', 'EbookController@edit')->name('ebooks.edit');
+Route::get('ebooks/{id}/show-download', 'EbookController@showDownload')->name('ebooks.download.show');
+Route::get('ebooks/{id}/download', 'EbookController@download')->name('ebooks.download');
 Route::get('ebooks/{id}', 'EbookController@show')->name('ebooks.show');
 Route::post('contents', 'ContentController@store')->name('contents.store');
 Route::get('contents', 'ContentController@index')->name('contents');
